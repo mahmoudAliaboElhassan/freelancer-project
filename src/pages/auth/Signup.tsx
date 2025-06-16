@@ -1,36 +1,92 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
+// import { toast } from "react-toastify";
+import { useAppDispatch } from "@/hooks/use-redux-hooks";
+import { signUp } from "@/state/act/actAuth";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    agreeToTerms: false
+    agreeToTerms: false,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation
     if (formData.password !== formData.confirmPassword) {
-      console.error("Passwords don't match");
+      alert("Passwords don't match");
       return;
     }
-    console.log("Signup attempt:", formData);
-    // TODO: Implement actual authentication logic
+
+    if (!formData.agreeToTerms) {
+      alert("Please agree to the terms and conditions");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Prepare data for API (adjust field names if needed)
+      const userData = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        // Add any other fields your API expects
+      };
+
+      const result = await dispatch(signUp(userData)).unwrap();
+
+      // Success handling
+      toast.success(
+        "Account created successfully! Please check your email for verification."
+      );
+
+      // Navigate to login or verification page
+      navigate("/auth/login");
+    } catch (error: any) {
+      // Error handling
+      console.error("Signup error:", error);
+
+      if (error?.message) {
+        alert(error.message);
+      } else if (error?.data?.message) {
+        alert(error.data.message);
+      } else if (error?.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Failed to create account. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -60,6 +116,7 @@ const Signup = () => {
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -75,6 +132,7 @@ const Signup = () => {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="pl-10"
                     required
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -87,16 +145,24 @@ const Signup = () => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     className="pl-10 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isLoading}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -109,16 +175,24 @@ const Signup = () => {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("confirmPassword", e.target.value)
+                    }
                     className="pl-10 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isLoading}
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -126,7 +200,10 @@ const Signup = () => {
                 <Checkbox
                   id="terms"
                   checked={formData.agreeToTerms}
-                  onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked as boolean)}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("agreeToTerms", checked as boolean)
+                  }
+                  disabled={isLoading}
                 />
                 <Label htmlFor="terms" className="text-sm">
                   I agree to the{" "}
@@ -141,16 +218,26 @@ const Signup = () => {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={!formData.agreeToTerms}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!formData.agreeToTerms || isLoading}
               >
-                Create Account
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link to="/auth/login" className="text-primary hover:underline font-medium">
+                <Link
+                  to="/auth/login"
+                  className="text-primary hover:underline font-medium"
+                >
                   Sign in
                 </Link>
               </p>

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,16 +9,16 @@ interface HeaderProps {
   icon?: React.ReactNode;
 }
 
-const Header = ({ 
-  showAuthButtons = true, 
-  title = "AuthApp",
-  icon = <Shield className="w-4 h-4 text-primary" />
+const Header = ({
+  showAuthButtons = true,
+  title = "Freelancer",
+  icon = <Shield className="w-4 h-4 text-primary" />,
 }: HeaderProps) => {
   // Mock user data - always exists
   const user = {
     id: "1",
     email: "user@example.com",
-    name: "John Doe"
+    name: "John Doe",
   };
 
   const handleLogout = () => {
