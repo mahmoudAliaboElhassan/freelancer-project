@@ -1,124 +1,243 @@
-"use client";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Eye, EyeOff } from "lucide-react";
 
-export default function LoginForm() {
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
-  const [showPassword, setShowPassword] = useState(false);
+interface LoginFormData {
+  email?: string;
+  mobile?: string;
+  password: string;
+}
+
+const Login: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<"mobile" | "email">("mobile");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    mobile: "",
+    password: "",
+  });
+
+  const handleInputChange = (field: keyof LoginFormData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    console.log("Login attempt with:", formData);
+    // Handle login logic here
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleSocialLogin = (provider: string) => {
+    console.log(`${provider} login clicked`);
+    // Handle social login logic here
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-800">
-            Login
-          </CardTitle>
-          <p className="text-blue-600 font-semibold">Welcome Back!</p>
-          <p className="text-blue-600 text-sm">طلب وصول</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Login Method Toggle */}
-          <div className="flex gap-2 mb-4">
-            <Button
-              variant={loginMethod === "email" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLoginMethod("email")}
-              className="flex-1"
-            >
-              Email Address
-              <span className="text-xs mr-2">طلب وصول</span>
-            </Button>
-            <Button
-              variant={loginMethod === "phone" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLoginMethod("phone")}
-              className="flex-1"
-            >
-              Mobile number
-              <span className="text-xs mr-2">طلب وصول</span>
-            </Button>
-          </div>
+    <div
+      style={{ flexDirection: "column" }}
+      className="min-h-screen bg-gray-50 flex items-center justify-center p-4"
+    >
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-green-600 tracking-wider mb-2">
+          LOGIN
+        </h1>
+        <p className="text-gray-600">Welcome Back!</p>
+      </div>
+      <Card className="w-full max-w-md shadow-lg">
+        <CardContent className="p-8">
+          {/* Header */}
 
-          {/* Email/Phone Input */}
-          <div className="space-y-2">
-            <Label htmlFor="contact">
-              {loginMethod === "email" ? "Email Address" : "Phone Number"}
-            </Label>
-            <div className="flex">
-              {loginMethod === "phone" && (
-                <span className="inline-flex items-center px-3 border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm rounded-l-md">
-                  +966
-                </span>
-              )}
-              <Input
-                id="contact"
-                type={loginMethod === "email" ? "email" : "tel"}
-                placeholder={
-                  loginMethod === "email" ? "Enter your email" : "-- --- ----"
-                }
-                className={loginMethod === "phone" ? "rounded-l-none" : ""}
-              />
-            </div>
-            <p className="text-xs text-gray-500">Helper Text</p>
-          </div>
-
-          {/* Password Input */}
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-              />
-            </div>
-            <div className="flex justify-between items-center">
-              <p className="text-xs text-gray-500">Helper Text</p>
-              <Button
-                variant="link"
-                size="sm"
-                className="text-blue-600 p-0 h-auto"
+          {/* Tabs */}
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "mobile" | "email")}
+            className="mb-6"
+          >
+            <TabsList className="grid w-full grid-cols-2 bg-gray-100">
+              <TabsTrigger
+                value="email"
+                className="data-[state=active]:bg-white data-[state=active]:text-gray-900"
               >
-                Forgot your password?
+                Email Address
+              </TabsTrigger>
+              <TabsTrigger
+                value="mobile"
+                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
+              >
+                Mobile Number
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="space-y-4">
+              {/* Email Tab Content */}
+              <TabsContent value="email" className="space-y-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Email Address
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className="border-2 focus:border-green-500"
+                    required
+                  />
+                </div>
+              </TabsContent>
+
+              {/* Mobile Tab Content */}
+              <TabsContent value="mobile" className="space-y-4">
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="mobile"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Phone Number
+                  </Label>
+                  <div className="flex">
+                    <div className="flex items-center px-3 bg-gray-100 border-2 border-r-0 rounded-l-md border-gray-200">
+                      <div className="w-5 h-4 bg-green-600 rounded-sm mr-2"></div>
+                      <span className="text-sm font-medium text-gray-700">
+                        +966
+                      </span>
+                    </div>
+                    <Input
+                      id="mobile"
+                      type="tel"
+                      placeholder="--- ---"
+                      value={formData.mobile}
+                      onChange={(e) =>
+                        handleInputChange("mobile", e.target.value)
+                      }
+                      className="border-2 rounded-l-none focus:border-green-500 border-l-0"
+                      required
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
+                    className="border-2 focus:border-green-500 pr-10"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-500" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Forgot Password */}
+              <div className="text-right">
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-sm text-gray-600 hover:text-gray-800 p-0 h-auto"
+                >
+                  Forgot your password?
+                </Button>
+              </div>
+
+              {/* Login Button */}
+              <Button
+                onClick={handleSubmit}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 text-base font-semibold"
+              >
+                Login
               </Button>
             </div>
-          </div>
-
-          {/* Login Button */}
-          <Button className="w-full bg-blue-600 hover:bg-blue-700">
-            Login
-            <span className="text-xs mr-2">طلب وصول</span>
-          </Button>
+          </Tabs>
 
           {/* Sign Up Link */}
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Button variant="link" className="text-blue-600 p-0 h-auto">
-              Create a new account
-            </Button>
-          </p>
+          <div className="text-center mt-6">
+            <span className="text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Button
+                type="button"
+                variant="link"
+                className="text-gray-800 hover:text-gray-900 p-0 h-auto font-semibold"
+              >
+                Create a new account
+              </Button>
+            </span>
+          </div>
 
-          {/* Social Login */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-3">Or signup using</p>
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" size="sm">
-                Google
-              </Button>
-              <Button variant="outline" size="sm">
-                Facebook
-              </Button>
-              <Button variant="outline" size="sm">
-                Twitter
-              </Button>
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
             </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">
+                Or signup using
+              </span>
+            </div>
+          </div>
+
+          {/* Social Login Buttons */}
+          <div className="flex justify-center space-x-4">
+            {[
+              { name: "Google", symbol: "G", color: "text-red-500" },
+              { name: "Apple", symbol: "🍎", color: "text-black" },
+              { name: "Twitter", symbol: "𝕏", color: "text-blue-500" },
+              { name: "Facebook", symbol: "f", color: "text-blue-600" },
+            ].map((social) => (
+              <Button
+                key={social.name}
+                type="button"
+                variant="outline"
+                size="sm"
+                className={`w-12 h-12 rounded-full border-2 hover:shadow-md transition-all duration-200 hover:-translate-y-1 ${social.color}`}
+                onClick={() => handleSocialLogin(social.name)}
+              >
+                <span className="text-lg font-bold">{social.symbol}</span>
+              </Button>
+            ))}
           </div>
         </CardContent>
       </Card>
     </div>
   );
-}
+};
+
+export default Login;
